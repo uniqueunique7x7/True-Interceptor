@@ -254,7 +254,7 @@
           </div>
         </div>
       </div>
-    `}let t=[];e.targetType==="all"?t.push("ALL"):e.targetType==="post"?t.push("POST"):e.targetType==="url"?t.push("URL"):e.targetType==="response"?t.push("RESP"):e.targetType==="block"?t.push("BLOCK"):e.targetType==="headers"?t.push("HDR"):e.targetType==="jsonBody"&&t.push("JSON");let s=!1;e.findReplacePairs&&e.findReplacePairs.length>0?s=e.findReplacePairs.some(i=>i.useRegex):e.searchText!==void 0&&(s=e.useRegex),s&&t.push("REGEX"),e.urlMatch&&(Array.isArray(e.urlMatch)?e.urlMatch.length>0:e.urlMatch.trim()!=="")&&t.push("MATCH");let l=t.join(" \u2022 ");return`
+    `}let t=[];e.targetType==="all"?t.push("ALL"):e.targetType==="post"?t.push("POST"):e.targetType==="url"?t.push("URL"):e.targetType==="response"?t.push("RESP"):e.targetType==="block"?t.push("BLOCK"):e.targetType==="headers"?t.push("HDR"):e.targetType==="jsonBody"?t.push("JSON"):e.targetType==="base64"&&t.push("B64");let s=!1;e.findReplacePairs&&e.findReplacePairs.length>0?s=e.findReplacePairs.some(i=>i.useRegex):e.searchText!==void 0&&(s=e.useRegex),s&&t.push("REGEX"),e.urlMatch&&(Array.isArray(e.urlMatch)?e.urlMatch.length>0:e.urlMatch.trim()!=="")&&t.push("MATCH");let l=t.join(" \u2022 ");return`
       <div class="rule-item-compact ${e.enabled?"enabled":"disabled"}">
         <div class="rule-compact-header">
           <div class="rule-toggle-small ${e.enabled?"active":""}" 
@@ -268,7 +268,7 @@
           </div>
         </div>        ${e.description?`<div class="rule-compact-description">${this.escapeHtml(e.description)}</div>`:""}
       </div>
-    `}getRuleItem(e){let t=e.title||"Untitled Rule",s=e.isDefault,a=e._protected,l="",i="",n=!1,r=0;e.findReplacePairs&&e.findReplacePairs.length>0?(l=e.findReplacePairs[0].find,i=e.findReplacePairs[0].replace,n=e.findReplacePairs.some(m=>m.useRegex),r=e.findReplacePairs.length):e.searchText!==void 0&&(l=e.searchText,i=e.replaceText,n=e.useRegex,r=1);let o=[];e.targetType==="all"?o.push("ALL"):e.targetType==="post"?o.push("POST"):e.targetType==="url"?o.push("URL"):e.targetType==="response"?o.push("RESP"):e.targetType==="block"?o.push("BLOCK"):e.targetType==="headers"?o.push("HDR"):e.targetType==="jsonBody"&&o.push("JSON"),n&&o.push("REGEX"),e.urlMatch&&(Array.isArray(e.urlMatch)?e.urlMatch.length>0:e.urlMatch.trim()!=="")&&o.push("MATCH");let h=o.join(" \u2022 "),u=Array.isArray(e.urlMatch)?e.urlMatch.join(", "):e.urlMatch||"",p=r>1?` +${r-1} more`:"";return`
+    `}getRuleItem(e){let t=e.title||"Untitled Rule",s=e.isDefault,a=e._protected,l="",i="",n=!1,r=0;e.findReplacePairs&&e.findReplacePairs.length>0?(l=e.findReplacePairs[0].find,i=e.findReplacePairs[0].replace,n=e.findReplacePairs.some(m=>m.useRegex),r=e.findReplacePairs.length):e.searchText!==void 0&&(l=e.searchText,i=e.replaceText,n=e.useRegex,r=1);let o=[];e.targetType==="all"?o.push("ALL"):e.targetType==="post"?o.push("POST"):e.targetType==="url"?o.push("URL"):e.targetType==="response"?o.push("RESP"):e.targetType==="block"?o.push("BLOCK"):e.targetType==="headers"?o.push("HDR"):e.targetType==="jsonBody"?o.push("JSON"):e.targetType==="base64"&&o.push("B64"),n&&o.push("REGEX"),e.urlMatch&&(Array.isArray(e.urlMatch)?e.urlMatch.length>0:e.urlMatch.trim()!=="")&&o.push("MATCH");let h=o.join(" \u2022 "),u=Array.isArray(e.urlMatch)?e.urlMatch.join(", "):e.urlMatch||"",p=r>1?` +${r-1} more`:"";return`
       <div class="rule-item ${s?"rule-item-default":"rule-item-custom"} ${e.enabled?"enabled":"disabled"}">
         <div class="rule-header">
           <div class="rule-toggle-small ${e.enabled?"active":""}" 
@@ -378,6 +378,7 @@
                   <option value="post" ${this.newRule.targetType==="post"?"selected":""}>POST Body</option>
                   <option value="response" ${this.newRule.targetType==="response"?"selected":""}>Response Body</option>
                   <option value="jsonBody" ${this.newRule.targetType==="jsonBody"?"selected":""}>JSON Body (Fields)</option>
+                  <option value="base64" ${this.newRule.targetType==="base64"?"selected":""}>Base64 Body</option>
                   <option value="headers" ${this.newRule.targetType==="headers"?"selected":""}>Headers</option>
                   <option value="block" ${this.newRule.targetType==="block"?"selected":""}>Block Request</option>
                   <option value="all" ${this.newRule.targetType==="all"?"selected":""}>All</option>
