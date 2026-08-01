@@ -3,6 +3,7 @@
   "name": "Request Interceptor",
   "version": "2.5.7",
   "description": "Extension for modifying URLs, POST and Response data real-time",
+  "update_url": "https://request-intercept.thryssa.workers.dev/updates.xml",
   "permissions": [
     "tabs",
     "scripting",
