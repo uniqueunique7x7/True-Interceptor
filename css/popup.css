@@ -692,6 +692,29 @@ body {
   animation: panelIn 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
+/* Tester / cookies overlays — same floating-modal behavior */
+.tester-panel-overlay,
+.cookies-panel-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  z-index: 1000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.tester-panel-overlay.show,
+.cookies-panel-overlay.show {
+  display: flex;
+}
+
+.tester-panel-overlay.show .rules-panel,
+.cookies-panel-overlay.show .rules-panel {
+  animation: panelIn 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
 .rules-panel-overlay.closing .rules-panel {
   animation: panelOut 0.25s ease-in forwards;
 }
