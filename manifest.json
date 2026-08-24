@@ -10,6 +10,7 @@
     "unlimitedStorage",
     "webRequest",
     "webNavigation",
+    "declarativeNetRequest",
     "activeTab"
   ],
   "host_permissions": [
