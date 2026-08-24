@@ -1355,14 +1355,23 @@ body {
   font-size: 11px;
   font-weight: 600;
   color: var(--gold-primary);
+  margin-top: 14px;
   margin-bottom: 6px;
   display: block;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
+.find-replace-pair label:first-of-type {
+  margin-top: 0;
+}
+
 .find-replace-pair .form-input {
   margin-bottom: 12px;
+}
+
+.find-replace-pair .form-input-sm {
+  width: 100%;
 }
 
 .find-replace-pair .form-input:last-of-type {
