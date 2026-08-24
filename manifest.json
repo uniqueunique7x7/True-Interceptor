@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Request Interceptor",
-  "version": "2.6.10",
+  "version": "2.7.0",
   "description": "Extension for modifying URLs, POST and Response data real-time",
   "permissions": [
     "tabs",
