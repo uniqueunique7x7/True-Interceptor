@@ -464,7 +464,7 @@
             </div>
             ${this.newRule.targetType==="findReplace"||this.newRule.targetType==="jsonBody"||this.newRule.targetType==="headers"?`
             <div class="form-group blocks-group">
-              <label class="form-label">Blocks <small style="font-size:11px;color:var(--text-muted)">(ordered actions \u2014 like OpenBullet, each block does one thing)</small></label>
+              <label class="form-label">Blocks <small style="font-size:11px;color:var(--text-muted)">(ordered actions, each block does one thing)</small></label>
               <div class="blocks-list">${(this.newRule.blocks||[]).map((t,s)=>this._blockRowHtml(t,s)).join("")||'<div class="empty-hint">No blocks yet. Click "+ Add Block" to add one.</div>'}</div>
               <button type="button" class="btn btn-secondary btn-sm btn-add-block mt-2">+ Add Block</button>
             </div>
