@@ -245,8 +245,9 @@ body {
   border-radius: var(--border-radius-lg);
   flex-shrink: 0;
   overflow: hidden;
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
+  /* Header bg is an opaque gradient, so backdrop-filter blur was invisible
+     but forced the browser to composite a blur layer over the whole popup
+     (a real perf hit). No visual change without it. */
 }
 
 /* Subtle animated top edge */
