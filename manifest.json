@@ -1,17 +1,15 @@
 {
   "manifest_version": 3,
   "name": "Request Interceptor",
-  "version": "2.8.5",
+  "version": "2.8.6",
   "description": "Extension for modifying URLs, POST and Response data real-time",
   "permissions": [
     "tabs",
     "scripting",
     "storage",
     "unlimitedStorage",
-    "webRequest",
     "webNavigation",
-    "declarativeNetRequest",
-    "activeTab"
+    "declarativeNetRequest"
   ],
   "host_permissions": [
     "<all_urls>"
