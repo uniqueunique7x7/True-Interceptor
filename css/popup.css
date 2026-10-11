@@ -29,6 +29,10 @@
   --border-color-soft: #1f1f24;
   --border-gold: #d4af3750;
   --border-red: #c41e3a50;
+  /* Neutral "raised" border for the hover state of OFF controls. The hover
+     styles used to reuse the gold/red accents, so a control that was OFF lit up
+     in its ON colour as soon as the pointer passed over it. */
+  --border-strong: #3a3a42;
   
   /* Functional colors */
   --success: #2ecc71;
@@ -40,7 +44,7 @@
   --shadow: 0 2px 6px rgba(0, 0, 0, 0.28);
   --shadow-md: 0 6px 20px rgba(0, 0, 0, 0.4);
   --shadow-lg: 0 12px 36px rgba(0, 0, 0, 0.5);
-  --shadow-gold: 0 0 24px rgba(212, 175, 55, 0.12);
+  --shadow-gold: 0 0 16px rgba(212, 175, 55, 0.08);
   --shadow-red: 0 0 24px rgba(196, 30, 58, 0.12);
   
   /* Border radius */
@@ -48,24 +52,64 @@
   --border-radius-sm: 6px;
   --border-radius-lg: 14px;
   --border-radius-xl: 18px;
+  /* A pill must be a true pill at ANY height. The ad-hoc values in this file
+     (11px, 13px, 14px, 20px) each happened to equal half the height of one
+     specific component, so the same "pill" rendered as a squashed shape the
+     moment its height changed or it was reused elsewhere. */
+  --radius-pill: 999px;
   
   /* Motion */
   --ease: cubic-bezier(0.4, 0, 0.2, 1);
   --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* ── Design system scale ─────────────────────────────────────
+     One source of truth for spacing, control heights, icon sizes and type.
+     Components must reuse these instead of ad-hoc pixel values so toolbar
+     controls, modals and panels stay aligned with each other. */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 28px;
+  --control-h: 40px;      /* text inputs, selects, primary buttons */
+  --control-h-sm: 32px;   /* compact/inline controls, small buttons */
+  --icon-sm: 16px;
+  --icon-md: 18px;
+  --icon-lg: 20px;
+  --font-xs: 11px;
+  --font-sm: 12px;
+  --font-md: 15px;
+  --font-lg: 16px;
+  --font-xl: 20px;
+  --line-tight: 20px;
+  --line-normal: 22px;
+
+  /* Typography — one system-first stack so text is rasterised by the platform
+     at the display's real pixel ratio, with no network font and no FOUT swap.
+     Line heights are INTEGER pixel values: a fractional line box (19px * 1.2
+     = 22.8px) pushes everything below it onto half-pixel positions, which is
+     what made the main view look soft while the integer-positioned modal
+     looked crisp. */
+  --font-stack: system-ui, -apple-system, 'Segoe UI Variable Text', 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: ui-monospace, 'Cascadia Mono', 'Segoe UI Mono', Menlo, Consolas, monospace;
+  --lh-xs: 18px;
+  --lh-sm: 20px;
+  --lh-md: 22px;
+  --lh-lg: 26px;
 }
 
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  /* subpixel-antialiased = ClearType on Windows (sharp text) */
-  -webkit-font-smoothing: subpixel-antialiased;
-  -moz-osx-font-smoothing: auto;
-  text-rendering: auto;
-  -webkit-text-size-adjust: 100%;
-  -ms-text-size-adjust: 100%;
   -webkit-tap-highlight-color: transparent;
 }
+
+/* NOTE: no global font-smoothing / text-rendering overrides. `-webkit-font-
+   smoothing` has no effect in Chrome (it is a macOS-only property) and Chrome
+   already chooses the correct antialiasing for the display; declaring it only
+   added a false impression of control. */
 
 html, body {
   background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
@@ -76,10 +120,16 @@ html, body {
 body {
   width: 100%;
   min-height: 100vh;
-  font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  font-size: 15px;
-  line-height: 1.6;
+  font-family: var(--font-stack);
+  font-size: var(--font-md);
+  line-height: var(--lh-md);
   font-weight: 400;
+}
+
+/* Set by the popup whenever a dialog/panel overlay is present, so the page
+   behind it cannot scroll (and cannot show a second scrollbar). */
+body.modal-open {
+  overflow: hidden;
 }
 
 /* Scrollbar styling */
@@ -102,19 +152,14 @@ body {
   background: var(--gold-primary);
 }
 
-/* Hide scrollbar on mobile devices for cleaner UI */
+/* Narrow layouts — which is the popup's natural width — keep a SLIM but
+   VISIBLE scrollbar. Hiding it entirely removed the only affordance that a
+   panel scrolls: long rule lists and tall modals just looked cut off, with
+   their action buttons unreachable-looking. */
 @media (max-width: 768px) {
-  /* Hide scrollbar for Webkit browsers (Chrome, Safari, Edge) */
-  *::-webkit-scrollbar {
-    display: none;
-    width: 0;
-    height: 0;
-  }
-  
-  /* Hide scrollbar but keep functionality for all browsers */
-  * {
-    scrollbar-width: none; /* Firefox */
-    -ms-overflow-style: none; /* IE and Edge */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
   }
 }
 
@@ -198,13 +243,13 @@ body {
   gap: 6px;
   padding: 20px;
   color: var(--text-muted);
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 500;
 }
 
 .skeleton-dot {
   animation: dotPulse 1.4s ease-in-out infinite;
-  font-size: 8px;
+  font-size: 9px;
   color: var(--gold-primary);
 }
 
@@ -305,16 +350,17 @@ body {
 }
 
 .header-title {
-  font-size: 19px;
+  font-size: var(--font-xl);
   font-weight: 700;
-  line-height: 1.2;
+  line-height: var(--lh-lg);
   color: var(--text-primary);
   letter-spacing: -0.2px;
   white-space: nowrap;
 }
 
 .header-subtitle {
-  font-size: 12px;
+  font-size: var(--font-sm);
+  line-height: var(--lh-xs);
   color: var(--text-muted);
   font-weight: 500;
   margin-top: 2px;
@@ -340,81 +386,42 @@ body {
 .header-version {
   display: inline-flex;
   align-items: center;
-  height: 26px;
-  padding: 0 10px;
+  /* Match the header toggle-switch height (52x28, hardcoded so its knob
+     geometry stays exact) so the header-right toolbar renders a single row of
+     equal-height controls rather than a badge taller than the switch beside
+     it. */
+  height: 28px;
+  padding: 0 var(--space-3);
   background: rgba(212, 175, 55, 0.08);
   border: 1px solid rgba(212, 175, 55, 0.18);
-  border-radius: 13px;
-  font-size: 11px;
+  border-radius: var(--radius-pill);
+  font-size: var(--font-sm);
   font-weight: 600;
   color: var(--gold-muted);
   letter-spacing: 0.3px;
   font-variant-numeric: tabular-nums;
 }
 
-/* Status chip */
-.header-status {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  height: 26px;
-  padding: 0 11px;
-  border-radius: 13px;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.4px;
-  text-transform: uppercase;
-  border: 1px solid var(--border-color);
-  background: var(--bg-tertiary);
-  color: var(--text-muted);
-}
-
-.header-status-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--text-muted);
-  transition: background 0.3s ease, box-shadow 0.3s ease;
-}
-
-.header-status.on {
-  background: rgba(46, 204, 113, 0.08);
-  border-color: rgba(46, 204, 113, 0.3);
-  color: var(--success);
-}
-
-.header-status.on .header-status-dot {
-  background: var(--success);
-  box-shadow: 0 0 6px var(--success);
-}
-
-.header-status.off {
-  color: var(--text-muted);
-}
-
-.header-status.off .header-status-dot {
-  background: var(--text-muted);
-}
-
 .logo-img {
   width: 44px;
   height: 44px;
-  border-radius: 12px;
+  /* The artwork inside this file is a CIRCLE on a square canvas. A 12px
+     rounded-square radius therefore drew a rounded-square ring around a
+     circular image, leaving the canvas's black corners visible between the ring
+     and the art (it read as a broken/pixelated ring). Matching the container to
+     the artwork removes the mismatch. */
+  border-radius: 50%;
   object-fit: cover;
   flex-shrink: 0;
-  image-rendering: auto;
-  transform: translateZ(0);
-  /* Use outline for crisp ring, avoid border-radius aliasing */
-  outline: 2px solid rgba(212, 175, 55, 0.3);
-  outline-offset: -2px;
-  box-shadow: 0 0 16px rgba(212, 175, 55, 0.1), inset 0 0 0 1px rgba(0,0,0,0.15);
-  transition: outline-color 0.25s var(--ease), box-shadow 0.25s var(--ease), transform 0.25s var(--ease);
+  /* A ring drawn with box-shadow stays inside the element's pixel grid. The
+     previous `outline` + translateZ(0) combination promoted the image onto a
+     composited layer and rendered the 2px ring across half pixels. */
+  box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.28), 0 2px 8px rgba(0, 0, 0, 0.35);
+  transition: box-shadow 0.2s var(--ease);
 }
 
 .logo-img:hover {
-  outline-color: var(--gold-primary);
-  box-shadow: 0 0 26px rgba(212, 175, 55, 0.22), inset 0 0 0 1px rgba(0,0,0,0.15);
-  transform: scale(1.05);
+  box-shadow: 0 0 0 2px var(--gold-primary), 0 2px 12px rgba(212, 175, 55, 0.22);
 }
 
 /* Version error banner */
@@ -425,7 +432,7 @@ body {
   border: 1px solid var(--border-red);
   border-radius: 8px;
   color: var(--red-light);
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 500;
   text-align: center;
   animation: versionPulse 2s ease-in-out infinite;
@@ -437,13 +444,17 @@ body {
 }
 
 /* Toggle Switch - Golden accent */
+/* OFF is neutral, ON is gold — and both are keyed to `aria-checked`, the same
+   value the JavaScript sets, so the paint cannot disagree with the real state.
+   Previously OFF kept a gold-tinted border (and turned gold on hover), which
+   read as "on" while interception was actually disabled. */
 .toggle-switch {
   position: relative;
   width: 52px;
   height: 28px;
   background: var(--bg-tertiary);
   border: 2px solid var(--border-color);
-  border-radius: 14px;
+  border-radius: var(--radius-pill);
   cursor: pointer;
   transition: background 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
   flex-shrink: 0;
@@ -451,42 +462,66 @@ body {
 }
 
 .toggle-switch:hover {
-  border-color: var(--gold-muted);
+  border-color: var(--border-strong);
 }
 
-.toggle-switch.active {
+.toggle-switch:active {
+  /* Pressed feedback without scale(): a non-integer scale re-rasterises the
+     rounded track and the circular thumb, which is what made a toggle look
+     jagged at the moment it was clicked. */
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.45);
+}
+
+.toggle-switch:focus-visible {
+  outline: 2px solid var(--gold-primary);
+  outline-offset: 2px;
+}
+
+.toggle-switch.active,
+.toggle-switch[aria-checked='true'] {
   background: linear-gradient(135deg, var(--gold-primary) 0%, var(--gold-dark) 100%);
   border-color: var(--gold-primary);
-  box-shadow: 0 0 10px rgba(212, 175, 55, 0.2);
+}
+
+.toggle-switch.active:hover,
+.toggle-switch[aria-checked='true']:hover {
+  border-color: var(--gold-light);
 }
 
 .toggle-switch-thumb {
   position: absolute;
+  /* box-sizing:border-box means the 52px track's CONTENT box is 48x24 (border
+     2px each side). The 18px knob is centred on that: (24-18)/2 = 3px vertical
+     and (48-18)/2 = 15px would overshoot, so horizontal travel = 48-18-2*3 =
+     24px, leaving an equal 3px gap at rest AND when on. */
   top: 3px;
   left: 3px;
   width: 18px;
   height: 18px;
   background: var(--text-primary);
   border-radius: 50%;
-  transition: left 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  /* Animating `transform` keeps the thumb on its own composited layer with a
+     snapped origin. Animating `left` (plus `will-change: left`) repainted on
+     every frame and re-rasterised the knob, which softened its edge. */
+  transition: transform 0.22s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-  will-change: left;
-  transform: translateZ(0);
 }
 
 .toggle-switch.active .toggle-switch-thumb {
-  left: 27px;
+  transform: translateX(24px);
   background: var(--bg-primary);
 }
 
-/* Small Toggle Switch for Rules - Red accent */
+/* Small Toggle Switch for Rules - Red accent.
+   Same state contract as the header switch: neutral when off, red when on, and
+   keyed to aria-checked so an OFF rule can never keep its ON colour. */
 .rule-toggle-small {
   position: relative;
   width: 38px;
   height: 22px;
   background: var(--bg-tertiary);
   border: 2px solid var(--border-color);
-  border-radius: 11px;
+  border-radius: var(--radius-pill);
   cursor: pointer;
   transition: background 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
   display: inline-block;
@@ -495,36 +530,42 @@ body {
 }
 
 .rule-toggle-small:hover {
-  border-color: var(--red-muted);
+  border-color: var(--border-strong);
 }
 
-.rule-toggle-small.active {
+.rule-toggle-small.active,
+.rule-toggle-small[aria-checked='true'] {
   background: linear-gradient(135deg, var(--red-primary) 0%, var(--red-dark) 100%);
   border-color: var(--red-primary);
   box-shadow: 0 0 8px rgba(196, 30, 58, 0.2);
 }
 
+.rule-toggle-small:focus-visible {
+  outline: 2px solid var(--red-light);
+  outline-offset: 2px;
+}
+
 .rule-toggle-small-thumb {
   position: absolute;
+  /* box-sizing:border-box -> 38px track content box is 34x18. 12px knob centred:
+     (18-12)/2 = 3px vertical, travel = 34-12-2*3 = 16px, equal 3px gaps. */
   top: 3px;
   left: 3px;
   width: 12px;
   height: 12px;
   background: var(--text-primary);
   border-radius: 50%;
-  transition: left 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform 0.22s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-  will-change: left;
-  transform: translateZ(0);
 }
 
 .rule-toggle-small.active .rule-toggle-small-thumb {
-  left: 19px;
+  transform: translateX(16px);
   background: var(--text-primary);
 }
 
 .rule-toggle-small:active {
-  transform: scale(0.95);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.5);
 }
 
 /* Main Content */
@@ -541,8 +582,8 @@ body {
   background: var(--bg-secondary);
   border: 1px solid var(--border-color);
   border-radius: var(--border-radius-lg);
-  padding: 24px;
-  margin-bottom: 24px;
+  padding: var(--space-5);
+  margin-bottom: var(--space-5);
   box-shadow: var(--shadow-md);
   position: relative;
   overflow: hidden;
@@ -555,6 +596,9 @@ body {
   left: 0;
   right: 0;
   height: 3px;
+  /* Follow the card's own top corners so the bar can never look like it is
+     cutting across the rounded edge instead of sitting inside it. */
+  border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
   background: linear-gradient(90deg, var(--gold-primary) 0%, var(--red-primary) 50%, var(--gold-primary) 100%);
 }
 
@@ -566,7 +610,7 @@ body {
 }
 
 .status-title {
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 600;
   color: var(--gold-primary);
   text-transform: uppercase;
@@ -577,7 +621,7 @@ body {
   display: flex;
   align-items: center;
   gap: 10px;
-  font-size: 14px;
+  font-size: 15px;
   color: var(--text-secondary);
   font-weight: 500;
 }
@@ -602,21 +646,20 @@ body {
   50% { opacity: 0.7; }
 }
 
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 16px;
-}
+/* The canonical stats grid is defined in the "6-COLUMN STATS GRID" section
+   below. This earlier 4-column copy was dead code — same specificity, fully
+   overridden by the later rule, so it only added an override layer. */
 
 .stat-item {
   text-align: center;
-  padding: 18px 12px;
+  padding: var(--space-3) var(--space-2);
   background: linear-gradient(160deg, var(--bg-tertiary) 0%, var(--bg-secondary) 100%);
   border-radius: var(--border-radius);
   border: 1px solid var(--border-color);
-  transition: all 0.25s var(--ease);
+  transition: transform 0.2s var(--ease), border-color 0.2s var(--ease), box-shadow 0.2s var(--ease);
   position: relative;
   overflow: hidden;
+  min-width: 0;
 }
 
 .stat-item::after {
@@ -643,20 +686,22 @@ body {
 }
 
 .stat-value {
-  font-size: 30px;
+  font-size: 22px;
   font-weight: 700;
   color: var(--gold-primary);
   display: block;
-  margin-bottom: 4px;
+  margin-bottom: 2px;
+  line-height: var(--lh-lg);
   font-variant-numeric: tabular-nums;
 }
 
 .stat-label {
-  font-size: 11px;
+  font-size: var(--font-sm);
   color: var(--text-secondary);
   text-transform: uppercase;
-  letter-spacing: 0.6px;
+  letter-spacing: 0.4px;
   font-weight: 500;
+  line-height: var(--lh-xs);
 }
 
 /* Rules Panel Cards */
@@ -687,6 +732,7 @@ body {
   left: 0;
   right: 0;
   height: 3px;
+  border-radius: 0 0 var(--border-radius-lg) var(--border-radius-lg);
   background: var(--red-primary);
   transition: background 0.25s ease;
   opacity: 0.9;
@@ -718,16 +764,16 @@ body {
 }
 
 .panel-info h3 {
-  font-size: 16px;
+  font-size: 17px;
   font-weight: 600;
   color: var(--text-primary);
   margin-bottom: 4px;
 }
 
 .panel-info p {
-  font-size: 13px;
+  font-size: 14px;
   color: var(--text-secondary);
-  line-height: 1.4;
+  line-height: var(--lh-sm);
 }
 
 .panel-count {
@@ -749,7 +795,6 @@ body {
   background: rgba(0, 0, 0, 0.85);
   z-index: 1000;
   display: none;
-  align-items: center;
   justify-content: center;
   padding: 20px;
 }
@@ -799,7 +844,7 @@ body {
   border-bottom: 1px solid var(--border-color);
 }
 .rule-group-title {
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
   color: var(--text-muted);
   text-transform: uppercase;
@@ -821,13 +866,13 @@ body {
 .url-params-group .empty-hint,
 .url-params-list .empty-hint {
   color: var(--text-muted);
-  font-size: 12px;
+  font-size: 13px;
   padding: 8px 0;
 }
 
 /* Per-rule hit counter */
 .rule-hits {
-  font-size: 11px;
+  font-size: 12px;
   color: #d4af37;
   margin-right: 8px;
   white-space: nowrap;
@@ -842,8 +887,8 @@ body {
 }
 
 @keyframes panelIn {
-  from { opacity: 0; transform: scale(0.92) translateY(16px); }
-  to   { opacity: 1; transform: scale(1) translateY(0); }
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes overlayFadeOut {
@@ -852,8 +897,8 @@ body {
 }
 
 @keyframes panelOut {
-  from { opacity: 1; transform: scale(1) translateY(0); }
-  to   { opacity: 0; transform: scale(0.92) translateY(16px); }
+  from { opacity: 1; transform: translateY(0); }
+  to   { opacity: 0; transform: translateY(16px); }
 }
 
 .rules-panel {
@@ -863,11 +908,16 @@ body {
   box-shadow: var(--shadow-lg), var(--shadow-gold);
   max-width: 800px;
   width: 100%;
-  max-height: 85vh;
+  max-height: calc(100vh - 40px);
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  margin: auto;
+  /* Anchor to a whole-pixel top inset instead of flex-centring. The panel's
+     height is content-driven (e.g. an odd 595px), and `align-items: center`
+     centred it on a half-pixel, which rasterised its rounded corners and text
+     across two device rows at 100% zoom — the "pixelated" look. A fixed even
+     top margin keeps every rounded edge on the pixel grid. */
+  margin: 20px auto;
 }
 
 .panel-header-full {
@@ -889,14 +939,14 @@ body {
 }
 
 .panel-header-full h3 {
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 700;
   color: var(--gold-primary);
   letter-spacing: -0.2px;
 }
 
 .panel-heading-sub {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--text-muted);
   font-weight: 500;
 }
@@ -915,8 +965,8 @@ body {
   padding: 0 11px;
   background: rgba(212, 175, 55, 0.08);
   border: 1px solid rgba(212, 175, 55, 0.18);
-  border-radius: 13px;
-  font-size: 11px;
+  border-radius: var(--radius-pill);
+  font-size: 12px;
   font-weight: 600;
   color: var(--gold-muted);
   letter-spacing: 0.3px;
@@ -939,7 +989,7 @@ body {
   left: 12px;
   top: 50%;
   transform: translateY(-50%);
-  font-size: 13px;
+  font-size: 14px;
   opacity: 0.6;
   pointer-events: none;
 }
@@ -1004,7 +1054,7 @@ body {
 }
 
 .section-title {
-  font-size: 16px;
+  font-size: 17px;
   font-weight: 600;
   color: var(--gold-primary);
   display: flex;
@@ -1093,15 +1143,15 @@ body {
 }
 
 .rule-compact-lock {
-  font-size: 12px;
+  font-size: 13px;
   flex-shrink: 0;
 }
 
 .rule-compact-title {
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 600;
   color: var(--text-primary);
-  line-height: 1.3;
+  line-height: var(--lh-md);
   display: -webkit-box;
   -webkit-line-clamp: 2;
   line-clamp: 2;
@@ -1113,12 +1163,12 @@ body {
 
 .rule-compact-cat {
   flex-shrink: 0;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   padding: 2px 8px;
-  border-radius: 20px;
+  border-radius: var(--radius-pill);
   color: var(--cat-color, #888);
   background: color-mix(in srgb, var(--cat-color, #888) 12%, transparent);
   border: 1px solid color-mix(in srgb, var(--cat-color, #888) 28%, transparent);
@@ -1129,7 +1179,7 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  font-size: 11px;
+  font-size: 12px;
   color: var(--gold-primary);
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -1137,9 +1187,9 @@ body {
 }
 
 .rule-compact-description {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--text-muted);
-  line-height: 1.3;
+  line-height: var(--lh-xs);
   display: -webkit-box;
   -webkit-line-clamp: 2;
   line-clamp: 2;
@@ -1148,10 +1198,10 @@ body {
 }
 
 .rule-compact-patterns {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--text-muted);
   margin-top: 8px;
-  line-height: 1.4;
+  line-height: var(--lh-xs);
 }
 
 .pattern-line {
@@ -1164,7 +1214,7 @@ body {
   padding: 2px 6px;
   border-radius: 4px;
   font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
-  font-size: 10px;
+  font-size: 11px;
   border: 1px solid var(--border-color);
 }
 
@@ -1176,7 +1226,7 @@ body {
 }
 
 .empty-text {
-  font-size: 14px;
+  font-size: 15px;
   margin-bottom: 8px;
 }
 
@@ -1200,12 +1250,12 @@ body {
 }
 
 .rule-title {
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 600;
   color: var(--text-primary);
   flex: 1;
   min-width: 0;
-  line-height: 1.3;
+  line-height: var(--lh-md);
   letter-spacing: -0.2px;
   margin: 0;
 }
@@ -1221,7 +1271,7 @@ body {
 .rule-type-badge {
   display: inline-flex;
   align-items: center;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 700;
   color: var(--gold-primary);
   text-transform: uppercase;
@@ -1237,7 +1287,7 @@ body {
 .rule-cat-tag {
   display: inline-flex;
   align-items: center;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -1250,7 +1300,7 @@ body {
 }
 
 .rule-desc {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--text-muted);
 }
 
@@ -1268,7 +1318,7 @@ body {
   gap: 4px;
   max-width: 240px;
   padding: 3px 9px;
-  font-size: 11px;
+  font-size: 12px;
   color: var(--gold-primary);
   background: var(--bg-tertiary);
   border: 1px solid var(--border-color);
@@ -1297,7 +1347,7 @@ body {
 }
 
 .pattern-label {
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 700;
   color: var(--gold-muted);
   text-transform: uppercase;
@@ -1313,14 +1363,14 @@ body {
   padding: 5px 10px;
   border-radius: var(--border-radius-sm);
   font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
-  font-size: 10px;
+  font-size: 11px;
   border: 1px solid var(--border-color);
   word-break: break-all;
   flex: 1;
 }
 
 .pattern-more {
-  font-size: 10px;
+  font-size: 11px;
   color: var(--text-muted);
   padding-left: 48px;
 }
@@ -1339,25 +1389,31 @@ body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 7px;
-  padding: 10px 18px;
+  gap: var(--space-1);
+  height: var(--control-h);
+  padding: 0 var(--space-4);
   border: 1px solid var(--border-color);
   border-radius: var(--border-radius);
   background: var(--bg-tertiary);
   color: var(--text-primary);
-  font-size: 13px;
+  font-size: var(--font-md);
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.25s var(--ease);
+  transition: transform 0.15s var(--ease), border-color 0.2s var(--ease), background 0.2s var(--ease), color 0.2s var(--ease), box-shadow 0.2s var(--ease);
   text-decoration: none;
-  line-height: 1;
+  /* An 18px line box keeps flex centring integral in BOTH control heights:
+     (36-18)/2 = 9 and (28-18)/2 = 5. `line-height: 1` produced an 11-13px box,
+     which centred on a half pixel and put the button label on a fractional
+     baseline (visible as a slightly soft label while its siblings were crisp). */
+  line-height: var(--lh-sm);
   text-transform: uppercase;
-  letter-spacing: 0.6px;
+  letter-spacing: 0.3px;
   white-space: nowrap;
 }
 
 .btn:hover {
-  transform: translateY(-2px);
+  /* A 2px lift made adjacent toolbar buttons visibly misalign on hover. */
+  transform: translateY(-1px);
   border-color: var(--gold-muted);
 }
 
@@ -1365,17 +1421,51 @@ body {
   transform: translateY(0);
 }
 
+/* Explicit non-interactive states.
+   This file previously had NO disabled styling for buttons or inputs, so a
+   disabled control kept its gold fill, its hover lift and its pointer cursor
+   and read as perfectly enabled. A control that cannot be used must look like
+   it cannot be used. */
+.btn:disabled,
+.btn[disabled],
+.btn[aria-disabled='true'],
+.btn.is-loading {
+  opacity: 0.5;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+
+.btn:disabled:hover,
+.btn[disabled]:hover,
+.btn[aria-disabled='true']:hover,
+.btn.is-loading:hover {
+  transform: none;
+  box-shadow: none;
+  border-color: var(--border-color);
+}
+
+.btn.is-loading {
+  cursor: progress;
+}
+
+/* Keyboard focus must be visible on every interactive control. */
+.btn:focus-visible {
+  outline: 2px solid var(--gold-primary);
+  outline-offset: 2px;
+}
+
 .btn-primary {
   background: linear-gradient(135deg, var(--gold-primary) 0%, var(--gold-dark) 100%);
   color: #0a0a0b;
   border-color: transparent;
-  box-shadow: 0 4px 16px rgba(212, 175, 55, 0.25);
+  box-shadow: 0 2px 8px rgba(212, 175, 55, 0.18);
 }
 
 .btn-primary:hover {
   background: linear-gradient(135deg, var(--gold-light) 0%, var(--gold-primary) 100%);
   border-color: transparent;
-  box-shadow: 0 6px 22px rgba(212, 175, 55, 0.4);
+  box-shadow: 0 3px 12px rgba(212, 175, 55, 0.26);
 }
 
 .btn-secondary {
@@ -1405,28 +1495,42 @@ body {
 
 /* Form Styles */
 .form-group {
-  margin-bottom: 20px;
+  margin-bottom: var(--space-4);
 }
 
 .form-label {
   display: block;
-  font-size: 12px;
+  font-size: var(--font-sm);
   font-weight: 600;
   color: var(--gold-primary);
-  margin-bottom: 8px;
+  margin-bottom: var(--space-2);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
+/* Fixed control heights — without an explicit height these varied between 39
+   and 41px (font metrics + padding), so controls in the same row never lined
+   up. Transitions are property-scoped: `transition: all` also animated
+   height/width, which made inputs visibly jump when their class changed. */
 .form-input {
   width: 100%;
-  padding: 11px 14px;
+  height: var(--control-h);
+  padding: 0 var(--space-3);
   border: 1px solid var(--border-color);
   border-radius: var(--border-radius);
   background: var(--bg-tertiary);
   color: var(--text-primary);
-  font-size: 14px;
-  transition: all 0.25s var(--ease);
+  font-size: var(--font-md);
+  line-height: var(--line-tight);
+  transition: border-color 0.2s var(--ease), box-shadow 0.2s var(--ease), background 0.2s var(--ease);
+}
+
+textarea.form-input {
+  height: auto;
+  min-height: var(--control-h);
+  padding: var(--space-2) var(--space-3);
+  line-height: var(--line-normal);
+  resize: vertical;
 }
 
 .form-input:focus {
@@ -1442,20 +1546,32 @@ body {
 
 .form-select {
   width: 100%;
-  padding: 11px 14px;
+  height: var(--control-h);
+  padding: 0 var(--space-3);
   border: 1px solid var(--border-color);
   border-radius: var(--border-radius);
   background: var(--bg-tertiary);
   color: var(--text-primary);
-  font-size: 14px;
+  font-size: var(--font-md);
+  line-height: var(--line-tight);
   cursor: pointer;
-  transition: all 0.25s var(--ease);
+  transition: border-color 0.2s var(--ease), box-shadow 0.2s var(--ease);
 }
 
 .form-select:focus {
   outline: none;
   border-color: var(--gold-primary);
   box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.12);
+}
+
+.form-input:disabled,
+.form-select:disabled,
+textarea.form-input:disabled,
+.form-input[aria-disabled='true'] {
+  opacity: 0.55;
+  cursor: not-allowed;
+  background: var(--bg-secondary);
+  color: var(--text-muted);
 }
 
 .form-select option {
@@ -1470,11 +1586,12 @@ body {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.85);
-  backdrop-filter: blur(4px);
+  /* No backdrop-filter: blurring everything behind the dialog smeared the
+     whole popup and read as "low resolution". A slightly stronger solid
+     scrim separates the dialog just as well and stays sharp. */
+  background: rgba(0, 0, 0, 0.9);
   z-index: 1000;
   display: none;
-  align-items: center;
   justify-content: center;
   padding: 20px;
 }
@@ -1494,10 +1611,13 @@ body {
   box-shadow: var(--shadow-lg), var(--shadow-gold);
   max-width: 700px;
   width: 100%;
-  max-height: 90vh;
+  max-height: calc(100vh - 40px);
   overflow-y: auto;
   display: flex;
   flex-direction: column;
+  /* Same whole-pixel anchor as .rules-panel: flex centring landed the dialog on
+     a half-pixel when its height was odd, blurring its rounded corners. */
+  margin: 20px auto;
 }
 
 /* Modal scrollbar */
@@ -1523,11 +1643,16 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 16px;
-  padding: 20px 24px;
+  gap: var(--space-4);
+  padding: var(--space-4) var(--space-5);
   border-bottom: 1px solid var(--border-color);
   flex-shrink: 0;
   background: linear-gradient(160deg, var(--bg-elevated) 0%, var(--bg-secondary) 100%);
+  /* Pin the title + close button: on a long form the header used to scroll
+     away, so the title and the only always-available close control vanished. */
+  position: sticky;
+  top: 0;
+  z-index: 2;
 }
 
 .modal-heading {
@@ -1538,16 +1663,16 @@ body {
 }
 
 .modal-title {
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 700;
   color: var(--gold-primary);
   text-transform: uppercase;
   letter-spacing: 1px;
-  line-height: 1.2;
+  line-height: var(--lh-lg);
 }
 
 .modal-subtitle {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--text-muted);
   font-weight: 500;
 }
@@ -1555,11 +1680,16 @@ body {
 .modal-actions {
   display: flex;
   align-items: center;
-  gap: 12px;
+  justify-content: flex-end;
+  gap: var(--space-3);
   flex-shrink: 0;
-  padding: 20px 24px;
+  padding: var(--space-4) var(--space-5);
   border-top: 1px solid var(--border-color);
   background: linear-gradient(160deg, var(--bg-secondary) 0%, var(--bg-elevated) 100%);
+  /* Save/Cancel stay reachable without scrolling to the end of a long form. */
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
 }
 
 /* Modal form grid + hint text */
@@ -1600,7 +1730,7 @@ body {
 }
 
 .cd-section-title {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
   color: var(--text-primary);
 }
@@ -1637,18 +1767,18 @@ body {
 }
 
 .cd-hint {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--text-muted);
-  line-height: 1.5;
+  line-height: var(--lh-sm);
   margin: 0 0 16px;
 }
 
 .form-hint {
   display: block;
-  font-size: 11px;
+  font-size: 12px;
   color: var(--text-muted);
   margin-top: 6px;
-  line-height: 1.4;
+  line-height: var(--lh-xs);
 }
 
 .form-row {
@@ -1677,7 +1807,7 @@ body {
 }
 
 .find-replace-pair label {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
   color: var(--gold-primary);
   margin-top: 14px;
@@ -1710,17 +1840,17 @@ body {
   padding: 4px 8px;
   min-width: 28px;
   height: 28px;
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .find-replace-pair .form-checkbox {
   margin: 0;
-  font-size: 12px;
+  font-size: 13px;
 }
 
 /* Form content padding */
 .modal form {
-  padding: 24px;
+  padding: var(--space-5);
   flex: 1;
 }
 
@@ -1732,7 +1862,7 @@ body {
 }
 
 .empty-text {
-  font-size: 14px;
+  font-size: 15px;
   margin-bottom: 8px;
   color: var(--text-secondary);
 }
@@ -1753,7 +1883,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 30px;
+  font-size: 32px;
   margin-bottom: 18px;
   background: var(--bg-tertiary);
   border: 1px dashed var(--border-color);
@@ -1762,7 +1892,7 @@ body {
 }
 
 .empty-state-text {
-  font-size: 15px;
+  font-size: 16px;
   margin-bottom: 20px;
   color: var(--text-secondary);
   font-weight: 500;
@@ -1770,34 +1900,52 @@ body {
 
 /* Button sizes */
 .btn-sm {
-  padding: 6px 14px;
-  font-size: 11px;
+  height: var(--control-h-sm);
+  padding: 0 var(--space-3);
+  font-size: var(--font-sm);
 }
 
 .btn-icon {
-  padding: 6px;
-  min-width: 32px;
-  height: 32px;
+  width: var(--control-h);
+  min-width: var(--control-h);
+  height: var(--control-h);
+  padding: 0;
+}
+
+/* Icon buttons in the small/extra-small sizes must stay SQUARE — a fixed
+   min-width with a smaller height produced 32x28 and 32x22 rectangles that
+   never lined up with the text buttons next to them. */
+.btn-icon.btn-sm {
+  width: var(--control-h-sm);
+  min-width: var(--control-h-sm);
+  height: var(--control-h-sm);
+}
+
+.btn-icon.btn-xs {
+  width: 24px;
+  min-width: 24px;
+  height: 24px;
 }
 
 /* Quick Actions toolbar */
 .quick-actions {
   display: flex;
-  gap: 10px;
+  gap: var(--space-2);
   flex-wrap: wrap;
   background: var(--bg-secondary);
   border: 1px solid var(--border-color);
   border-radius: var(--border-radius);
-  padding: 12px;
+  padding: var(--space-3);
 }
 
 .quick-actions .btn {
-  padding: 8px 14px;
-  font-size: 12px;
+  height: var(--control-h-sm);
+  padding: 0 var(--space-3);
+  font-size: var(--font-sm);
 }
 
 .quick-actions .qa-icon {
-  font-size: 14px;
+  font-size: 15px;
   display: inline-flex;
   align-items: center;
   pointer-events: none;
@@ -1838,7 +1986,7 @@ body {
   align-items: center;
   gap: 10px;
   cursor: pointer;
-  font-size: 12px;
+  font-size: 13px;
   color: var(--text-primary);
   user-select: none;
   line-height: 1;
@@ -1879,20 +2027,8 @@ body {
 }
 
 .form-checkbox input[type="checkbox"]:checked {
-  background: linear-gradient(135deg, var(--red-primary) 0%, var(--red-dark) 100%);
+  background: var(--red-primary) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6L9 17l-5-5'/%3E%3C/svg%3E") center / 12px 12px no-repeat;
   border-color: var(--red-primary);
-}
-
-.form-checkbox input[type="checkbox"]:checked::after {
-  content: '✓';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  color: white;
-  font-size: 11px;
-  font-weight: bold;
-  line-height: 1;
 }
 
 .form-checkbox input[type="checkbox"]:focus {
@@ -1909,10 +2045,13 @@ body {
   animation: error-shake 0.6s ease-in-out;
 }
 
+/* No scale(): animating scale(1.02) re-rasterised every rounded corner on the
+   element mid-animation. The glow carries the same feedback without touching
+   geometry. */
 @keyframes success-pulse {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.02); box-shadow: var(--shadow-gold); }
-  100% { transform: scale(1); }
+  0%   { box-shadow: 0 0 0 0 rgba(212, 175, 55, 0); }
+  50%  { box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.28); }
+  100% { box-shadow: 0 0 0 0 rgba(212, 175, 55, 0); }
 }
 
 @keyframes error-shake {
@@ -1934,7 +2073,7 @@ body {
   }
   
   .header-title {
-    font-size: 20px;
+    font-size: 22px;
   }
   
   .logo-img {
@@ -1950,12 +2089,9 @@ body {
     padding: 20px;
     margin-bottom: 24px;
   }
-  
-  .stats-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 16px;
-  }
-  
+
+  /* (the stats grid is defined once, in the 6-COLUMN STATS GRID section) */
+
   .rules-panels {
     grid-template-columns: 1fr;
     gap: 20px;
@@ -1966,7 +2102,7 @@ body {
   }
   
   .section-title {
-    font-size: 18px;
+    font-size: 20px;
   }
   
   .modal {
@@ -1980,7 +2116,7 @@ body {
   }
   
   .modal-title {
-    font-size: 18px;
+    font-size: 20px;
   }
   
   .modal form {
@@ -2011,6 +2147,8 @@ body {
   }
   
   .toggle-switch-thumb {
+    /* 44px track, border-box -> 40x20 content; 16px knob -> 2px inset,
+       top/left = 2px, travel = 40-16-2*2 = 20px. */
     top: 2px;
     left: 2px;
     width: 16px;
@@ -2018,7 +2156,7 @@ body {
   }
   
   .toggle-switch.active .toggle-switch-thumb {
-    left: 22px;
+    transform: translateX(20px);
   }
   
   .rule-toggle-small {
@@ -2027,6 +2165,8 @@ body {
   }
   
   .rule-toggle-small-thumb {
+    /* 36px track -> 32x16 content; 12px knob -> 2px inset, top/left = 2px,
+       travel = 32-12-2*2 = 16px. */
     top: 2px;
     left: 2px;
     width: 12px;
@@ -2034,7 +2174,7 @@ body {
   }
   
   .rule-toggle-small.active .rule-toggle-small-thumb {
-    left: 18px;
+    transform: translateX(16px);
   }
   
   .modal {
@@ -2073,17 +2213,18 @@ body {
 
 /* ========== RULE REORDER BUTTONS ========== */
 .btn-xs {
-  padding: 2px 6px;
-  min-width: 22px;
-  height: 22px;
-  font-size: 10px;
+  padding: 0;
+  min-width: 24px;
+  width: 24px;
+  height: 24px;
+  font-size: var(--font-xs);
   line-height: 1;
-  border-radius: 4px;
+  border-radius: var(--border-radius-sm);
   background: var(--bg-elevated);
   border: 1px solid var(--border-color);
   color: var(--text-muted);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease;
 }
 
 .btn-xs:hover {
@@ -2097,7 +2238,7 @@ body {
 }
 
 .activity-count {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--text-muted);
   font-weight: 500;
 }
@@ -2118,7 +2259,7 @@ body {
   text-align: center;
   padding: 32px 20px;
   color: var(--text-muted);
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .activity-entry {
@@ -2127,7 +2268,7 @@ body {
   gap: 10px;
   padding: 10px 12px;
   border-radius: var(--border-radius);
-  font-size: 12px;
+  font-size: 13px;
   transition: all 0.2s var(--ease);
   background: var(--bg-tertiary);
   border: 1px solid var(--border-color);
@@ -2157,7 +2298,7 @@ body {
   display: inline-block;
   padding: 3px 9px;
   border-radius: 20px;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -2195,7 +2336,7 @@ body {
 
 .activity-url {
   color: var(--text-muted);
-  font-size: 11px;
+  font-size: 12px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -2216,7 +2357,7 @@ body {
 
 .activity-time {
   color: var(--text-muted);
-  font-size: 10px;
+  font-size: 11px;
   flex-shrink: 0;
   white-space: nowrap;
 }
@@ -2228,23 +2369,22 @@ body {
 
 .category-tabs {
   display: flex;
+  /* Wrap instead of scrolling: this row was a nowrap overflow scroller with its
+     scrollbar hidden, so once there were more categories than fitted, the last
+     tab was cut off at the panel edge with nothing to indicate it scrolled. */
+  flex-wrap: wrap;
   gap: 8px;
   padding: 14px 20px;
-  overflow-x: auto;
-  scrollbar-width: none;
   flex-shrink: 0;
-  flex-wrap: nowrap;
 }
-
-.category-tabs::-webkit-scrollbar { display: none; }
 
 .category-tab {
   padding: 7px 14px;
   background: var(--bg-tertiary);
   border: 1px solid var(--border-color);
-  border-radius: 20px;
+  border-radius: var(--radius-pill);
   color: var(--text-muted);
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 500;
   cursor: pointer;
   white-space: nowrap;
@@ -2272,7 +2412,7 @@ body {
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(6, 1fr);
-  gap: 10px;
+  gap: var(--space-3);
 }
 
 @media (max-width: 768px) {
@@ -2281,7 +2421,15 @@ body {
   }
 }
 
+/* The popup's natural width sits in the 360-480px band. Two columns there
+   stretched a single-digit tile to ~190px, so keep 3 up to 360px. */
 @media (max-width: 480px) {
+  .stats-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 360px) {
   .stats-grid {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -2308,8 +2456,16 @@ body {
 }
 
 .form-input-sm {
-  padding: 6px 10px !important;
-  font-size: 12px !important;
+  height: var(--control-h-sm);
+  padding: 0 var(--space-2);
+  font-size: var(--font-sm);
+  line-height: var(--line-tight);
+}
+
+textarea.form-input-sm {
+  height: auto;
+  min-height: var(--control-h-sm);
+  padding: var(--space-1) var(--space-2);
 }
 
 /* Block editor — inline labels on the left, controls on the right */
@@ -2344,7 +2500,7 @@ body {
 .block-item-index {
   flex: 0 0 auto;
   min-width: 18px;
-  font-size: 11px;
+  font-size: 12px;
   color: var(--text-muted, #999);
 }
 
@@ -2362,13 +2518,13 @@ body {
 .form-label-sm {
   flex: 0 0 92px;
   text-align: left;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
   color: var(--text-muted, #999);
   text-transform: uppercase;
   letter-spacing: 0.4px;
   margin: 0;
-  line-height: 1.4;
+  line-height: var(--lh-xs);
   white-space: nowrap;
   /* Match the indentation of the block-type dropdown's text (its padding-left) */
   padding-left: 10px;
@@ -2442,7 +2598,7 @@ body {
 .json-fields-group .empty-hint,
 .header-rules-group .empty-hint {
   color: var(--text-muted);
-  font-size: 12px;
+  font-size: 13px;
   font-style: italic;
   padding: 8px 0;
 }
@@ -2468,7 +2624,7 @@ body {
     padding: 14px 16px;
   }
   .header-title {
-    font-size: 16px;
+    font-size: 17px;
     white-space: normal;
     word-break: break-word;
   }
@@ -2556,7 +2712,7 @@ body {
     padding: 12px 14px;
   }
   .header-title {
-    font-size: 15px;
+    font-size: 16px;
   }
   .logo-img {
     width: 32px;
@@ -2565,7 +2721,7 @@ body {
   .header-status {
     height: 24px;
     padding: 0 9px;
-    font-size: 10px;
+    font-size: 11px;
   }
 
   /* Rules panel gets full-width margin */
